@@ -3,14 +3,6 @@ from Crypto.Util import Counter
 import os
 import binascii
 
-# AES encryption function
-def encrypt_aes_ctr(data, key, iv):
-    # Create a counter object for AES-CTR mode with a 128-bit block size.
-    ctr = Counter.new(128, initial_value=int.from_bytes(iv, byteorder='big'))
-    cipher = AES.new(key, AES.MODE_CTR, counter=ctr)
-    encrypted_data = cipher.encrypt(data)
-    return encrypted_data
-
 # AES decryption function
 def decrypt_aes_ctr(encrypted_data, key, iv):
     # Create a counter object for AES-CTR mode with a 128-bit block size.
