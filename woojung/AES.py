@@ -22,8 +22,6 @@ with open('encrypted_data.bin', 'rb') as f:
 
 decipher = AES.new(enc_key, AES.MODE_CBC, init_vec)
 
-#데이터 복호화
 decrypted_data = decipher.decrypt(encrypted_data)
 
-#복호화된 데이터 출력
 print("Decrypted Data: ", decrypted_data)
