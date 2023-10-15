@@ -9,8 +9,13 @@ import os, sys                              #파일 내부 디렉토리
 PRIVATE_KEY_RSA_FILENAME=f"KEY_FILE"
 PRIVATE_KEY_RSA=0
 PUBLIC_KEY_RSA=0
+
 PRIVATE_KEY_AES_FILENAME=f"KEY_FILE2"
 PRIVATE_KEY_AES=0
+
+PUBLIC_SERVER_RSA_KEY=PrivateKey(b'=\xe5!\xfb\xf0\x82\xa2\x1f\x070\x0c\xad\xdcR\x16=\x03\\\xa8\x11\xc6\xa4\xa3\xd7,Kn;\n\xb8\xcd.').public_key
+
+AES_BOX=0
 
 #1. RSA개인키 생성_스크립트 인자로 key path를 입력받으면 해당 내용을 읽어 로드(.py "privatePath")
 if os.path.isfile(PRIVATE_KEY_RSA_FILENAME):
@@ -38,7 +43,7 @@ else:
     print(PUBLIC_KEY_RSA)
     print("[DEBUG] Key is completely Saved!")
 
-#2. AES 개인키 생성
+#2. AES 대칭키 생성
 print()
 if os.path.isfile(PRIVATE_KEY_AES_FILENAME):
     print("[DEBUG] Loading AESKey...")
@@ -55,6 +60,16 @@ else:
         File.write(PRIVATE_KEY_AES)
     print("[DEBUG] Created AESKey")
     print(PRIVATE_KEY_AES)
+
+print()
+#3. AES 대칭키 암호화
+print("[DEBUG] Encrypting AESKey...")
+AES_BOX=Box(PRIVATE_KEY_RSA, PUBLIC_SERVER_RSA_KEY)
+encrypted_aes_key=AES_BOX.encrypt(PRIVATE_KEY_AES)
+print("[DEBUG] Complete Encryption")
+print(encrypted_aes_key)
+
+
     
 
 if __name__=='__main__':
