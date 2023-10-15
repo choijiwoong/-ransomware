@@ -24,6 +24,7 @@ if len(sys.argv)==2:
 else:
     print("[DEBUG] WARINING_Previous ServerRSAKey will be removed and we will create new key after 30 seconds. After covering key, we cannot decrypt client key before we linked.")
     sleep(30)
+    print("[DEBUG] Making ServerPrivateKey by using script argument...")
     PRIVATE_KEY_RSA=PrivateKey.generate()
     PUBLIC_KEY_RSA=PRIVATE_KEY_RSA.public_key
     with open(PRIVATE_KEY_RSA_FILENAME, 'wb') as File:
@@ -33,6 +34,8 @@ else:
     print("[DEBUG] Derived ServerPublicKey")
     print(PUBLIC_KEY_RSA)
     print("[DEBUG] Key is completely Saved!")
+
+
 
 if __name__=='__main__':
     print('hello')
