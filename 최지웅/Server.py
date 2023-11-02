@@ -4,6 +4,7 @@ from datetime import datetime               #시간정보
 from time import sleep                      #딜레이
 import os, sys                              #파일 내부 디렉토리
 import nacl
+import base64
 
 #0. 기본 환경설정
 PRIVATE_KEY_RSA_FILENAME=f"PRIVATE_KEY_RSA_SERVER_{datetime.now().strftime('%Y-%m-%d %H-%M-%S')}"
@@ -47,13 +48,15 @@ def parse_key_from_client(clientRSAPublicKey, encryptedClientAESKey):
     print(type(encryptedClientAESKey))
     BOX=Box(PRIVATE_KEY_RSA, clientRSAPublicKey)
     decryptedClientAESKey=BOX.decrypt(encryptedClientAESKey)
-    print("[DEBUG] Finished Parsing key. decrypted Client AES key: ", decryptedClientAESKey)
+    ClientAESKeyString=base64.b64encode(decryptedClientAESKey).decode('utf-8')
+    print("[DEBUG] Finished Parsing key. decrypted Client AES key: ", ClientAESKeyString)
     with open(DECRYPTED_KEY_AES_FILENAME, 'wb') as File:
         File.write(decryptedClientAESKey)
     print("[DEBUG] Saved Parsed AES Key for Client")
     
 
 if __name__=='__main__':
+   # sleep(1000)
     print('hello')
     parse_key_from_client(b'\xe1\x1d\xb6\xee\x1e\xd7\xd95\x02\x96\x19\xde\x9b\x80\xc5\\9PF>\xda\xef\xf1t\xb6\xb9/$o\x15\xf4;'
                           , b"Ni\xa9\xfcnPCf.q{{\xc8\x01\xeb\xbd\xaef\xa9G\x1eQ\xf0\x90\xa9(\xd7R\xb4\x98\xaf\x96\x9f%.V\xc0\x1a\xe2\x19K=\x9a\xce\x15\x82O\x047\x8a\x9d\x19\xcb\x9d'\x1a\x89\xfa\x16\xc8\x8aB\xa7vT\xbd\x11K`\xeb\xf2\x94")

