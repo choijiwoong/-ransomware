@@ -27,8 +27,6 @@ if len(sys.argv)==2:
     print(PUBLIC_KEY_RSA)
     print("[DEBUG] Key is completely Loaded!")
 else:
-    print("[DEBUG] WARINING_Previous ServerRSAKey will be removed and we will create new key after 30 seconds. After covering key, we cannot decrypt client key before we linked.")
-    sleep(30)
     print("[DEBUG] Making ServerPrivateKey by using script argument...")
     PRIVATE_KEY_RSA=PrivateKey.generate()
     PUBLIC_KEY_RSA=PRIVATE_KEY_RSA.public_key
@@ -58,6 +56,6 @@ def parse_key_from_client(clientRSAPublicKey, encryptedClientAESKey):
 if __name__=='__main__':
    # sleep(1000)
     print('hello')
-    parse_key_from_client(b'\xe1\x1d\xb6\xee\x1e\xd7\xd95\x02\x96\x19\xde\x9b\x80\xc5\\9PF>\xda\xef\xf1t\xb6\xb9/$o\x15\xf4;'
-                          , b"Ni\xa9\xfcnPCf.q{{\xc8\x01\xeb\xbd\xaef\xa9G\x1eQ\xf0\x90\xa9(\xd7R\xb4\x98\xaf\x96\x9f%.V\xc0\x1a\xe2\x19K=\x9a\xce\x15\x82O\x047\x8a\x9d\x19\xcb\x9d'\x1a\x89\xfa\x16\xc8\x8aB\xa7vT\xbd\x11K`\xeb\xf2\x94")
+    parse_key_from_client(b'\xd6\x91\x06\xcf\xde\xdc\xe4\xb0\xc80\xb6T=77\xbb\xefG\x04\x9fk\x05\xb3\xf9-\xa3\x92\t\xd0X\xbc\x07'
+                          , b'\x9dB\xc0\xe0C\x0b\xe1\x07\x94zt\xac9jf^\xb6\\\xb6\xce\x97\xeeNd\xee\xca\xc8y\x02p\xe4\x18\x95\xf5\x93\x0b#\xc7\xc8F\x04\x8a\x93\xca\x81}\xf4\x9a\xf3\xe7\xe1Qz+\x07[4-\x9d\x04N\x18.\xcb\x92|\xb0\xd99\xd5\xc7\xb6')
     print('h')

