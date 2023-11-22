@@ -12,6 +12,7 @@ from multiprocessing import Process
 from PIL import Image, ImageDraw, ImageFont
 from tkinter import Label, Entry
 import subprocess
+import pathlib
 
 fileName=sys.argv[0]
 afterFileName='Client_after_enc.exe'
